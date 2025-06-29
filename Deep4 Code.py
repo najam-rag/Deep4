@@ -81,3 +81,25 @@ if query:
         page = doc.metadata.get("page", "N/A")
         st.markdown(f"**Match {i+1}** — Clause `{clause}` | Page `{page}`")
         st.code(doc.page_content[:500], language="text")
+
+st.title("📘 AS3000 Code Assistant")
+query = st.text_input("💬 Ask your question:")
+
+if query:
+    docs = retriever.get_relevant_documents(query)
+    result = qa.combine_documents_chain.run(
+        input_documents=docs,
+        question=query
+    )
+
+    st.subheader("🔍 Answer")
+    st.success(result)
+
+    st.subheader("📚 Source Snippets")
+    for i, doc in enumerate(docs[:3]):
+        clause = doc.metadata.get("clause", "N/A")
+        page = doc.metadata.get("page", "N/A")
+        preview = doc.page_content.strip().replace("\n", " ")[:400]
+        with st.expander(f"Source {i+1} — Clause {clause}, Page {page}"):
+            st.code(preview, language="text")
+
