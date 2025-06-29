@@ -1,11 +1,13 @@
 streamlit
-openai
-langchain
 PyPDF2
 pdf2image
 pytesseract
+requests
 faiss-cpu
-tiktoken
-sentence-transformers
+openai
+langchain
 langchain-community
 langchain-openai
+tiktoken
+pillow
+
