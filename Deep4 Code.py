@@ -57,31 +57,6 @@ bm25 = BM25Retriever.from_documents(enriched_chunks)
 bm25.k = 3
 
 # === USER QUERY ===
-query = st.text_input("🔍 Ask your AS3000 question:")
-if query:
-    dense_docs = dense_retriever.get_relevant_documents(query)
-    sparse_docs = bm25.get_relevant_documents(query)
-    combined_docs = dense_docs + sparse_docs
-
-    llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model=LLM_MODEL)
-    qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
-        llm=llm, retriever=dense_retriever, return_source_documents=True
-    )
-
-    result = qa_chain.combine_documents_chain.run(
-        input_documents=combined_docs, question=query
-    )
-
-    st.subheader("✅ Best Answer")
-    st.success(result)
-
-    st.subheader("📚 Top Clause Matches")
-    for i, doc in enumerate(combined_docs[:3]):
-        clause = doc.metadata.get("clause", "Unknown")
-        page = doc.metadata.get("page", "N/A")
-        st.markdown(f"**Match {i+1}** — Clause `{clause}` | Page `{page}`")
-        st.code(doc.page_content[:500], language="text")
-
 st.title("📘 AS3000 Code Assistant")
 query = st.text_input("💬 Ask your question:")
 
