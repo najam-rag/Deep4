@@ -90,3 +90,21 @@ if query:
         page = doc.metadata.get("page", "N/A")
         st.markdown(f"**Match {i+1}** — Clause `{clause}` | Page `{page}`")
         st.code(doc.page_content[:500], language="text")
+
+# === Confidence Barometer ===
+def compute_confidence(docs):
+    base_score = 0
+    if len(docs) >= 2:
+        base_score += 40
+    if any("clause" in d.metadata and re.match(r"\d+\.\d+", d.metadata["clause"]) for d in docs):
+        base_score += 30
+    if all(len(d.page_content) > 300 for d in docs[:2]):
+        base_score += 20
+    return min(base_score + 10, 100)  # add 10 for base LLM confidence
+
+confidence_score = compute_confidence(combined_docs)
+
+st.subheader("📊 Confidence Barometer")
+st.progress(confidence_score / 100)
+st.write(f"**Confidence: {confidence_score}%** — Based on clause match, document strength, and chunk quality.")
+
