@@ -84,21 +84,21 @@ if query:
     st.subheader("✅ Best Answer")
     st.success(result)
 
-# === Confidence Barometer ===
-def compute_confidence(docs):
-    base_score = 0
-    if len(docs) >= 2:
-        base_score += 40
-    if any("clause" in d.metadata and re.match(r"\d+\.\d+", d.metadata["clause"]) for d in docs):
-        base_score += 30
-    if all(len(d.page_content) > 300 for d in docs[:2]):
-        base_score += 20
-    return min(base_score + 10, 100)  # add 10 for base LLM confidence
-
-confidence_score = compute_confidence(combined_docs)
-
-st.progress(confidence_score / 100)
-st.write(f"**Confidence: {confidence_score}%** — Based on clause match, document strength, and chunk quality.")
+    # === Confidence Barometer ===
+    def compute_confidence(docs):
+        base_score = 0
+        if len(docs) >= 2:
+            base_score += 40
+        if any("clause" in d.metadata and re.match(r"\d+\.\d+", d.metadata["clause"]) for d in docs):
+            base_score += 30
+        if all(len(d.page_content) > 300 for d in docs[:2]):
+            base_score += 20
+        return min(base_score + 10, 100)  # add 10 for base LLM confidence
+    
+    confidence_score = compute_confidence(combined_docs)
+    
+    st.progress(confidence_score / 100)
+    st.write(f"**Confidence: {confidence_score}%** — Based on clause match, document strength, and chunk quality.")
     
     st.subheader("📚 Top Clause Matches")
     for i, doc in enumerate(combined_docs[:3]):
