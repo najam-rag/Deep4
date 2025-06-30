@@ -1,15 +1,20 @@
+# Core App
 streamlit
-pypdf
-PyPDF2
-pdf2image
-pytesseract
-requests
-faiss-cpu
 openai
+faiss-cpu
+tiktoken
+pillow
+requests
+
+# LangChain Ecosystem
 langchain
 langchain-community
 langchain-openai
-tiktoken
-pillow
 rank_bm25
 
+# Adobe PDF Services SDK
+adobe-pdfservices-sdk==3.2.0  # Or latest stable
+
+# Optional: If you still do any OCR fallback
+# pytesseract
+# pdf2image
