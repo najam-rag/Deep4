@@ -17,9 +17,9 @@ st.set_page_config(page_title="📘 Adobe Metadata Search App", layout="wide")
 st.title("📘 Upload PDF (AS3000 etc.) — Powered by Adobe PDF SDK")
 
 OPENAI_API_KEY = st.secrets["openai_api_key"]
-ADOBE_CLIENT_ID = st.secrets["client_id"]
-ADOBE_CLIENT_SECRET = st.secrets["client_secret"]
-ADOBE_ORG_ID = st.secrets["organization_id"]
+ADOBE_CLIENT_ID = st.secrets["CLIENT_ID"]
+ADOBE_CLIENT_SECRET = st.secrets["CLIENT_SECRET"]
+ADOBE_ORG_ID = st.secrets["ORGANIZRION_ID"]
 
 # === FILE UPLOAD ===
 uploaded_file = st.file_uploader("📄 Upload a Code PDF (e.g., AS3000)", type="pdf")
