@@ -1,4 +1,4 @@
-# ✅ Advanced Clause-Aware Code QA App (Optimized Vectorstore)
+# ✅ Advanced Clause-Aware Code QA App (GPT Context Classifier + Optimized Vectorstore)
 import streamlit as st
 import tempfile
 import hashlib
@@ -16,11 +16,37 @@ from langchain.retrievers import BM25Retriever
 
 # === CONFIG ===
 st.set_page_config(page_title="📘 Upload AS3000 & Search Clauses", layout="wide")
-st.title("📘 Advanced Clause-Aware Search (PDF Only)")
+st.title(":blue_book: Advanced Clause-Aware Search (PDF Only)")
 
 OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY")
 EMBEDDING_MODEL = "text-embedding-3-small"
 LLM_MODEL = "gpt-3.5-turbo-1106"
+
+# === GPT Context Classifier ===
+def gpt_classify_query_context(query: str, openai_api_key: str) -> str:
+    import openai
+    openai.api_key = openai_api_key
+
+    system_prompt = """You are a classifier. Based on the user query, classify it into ONE of the following categories:
+- trafficable_area
+- under_concrete
+- open_ground
+- roof_space
+- general
+Return ONLY the category name, nothing else."""
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Query: {query}"},
+            ],
+            temperature=0
+        )
+        return response.choices[0].message.content.strip()
+    except Exception:
+        return "general"
 
 # === FILE UPLOAD ===
 uploaded_file = st.file_uploader("📄 Upload AS3000 PDF", type="pdf")
@@ -41,7 +67,7 @@ if "vectorstore_hash" not in st.session_state or st.session_state.vectorstore_ha
     chunks = splitter.split_documents(docs)
 
     def enrich_clause(doc: Document) -> Document:
-        match = re.search(r"\b(\d{1,2}(?:\.\d{1,2}){1,2})\b", doc.page_content)
+        match = re.search(r"\\b(\\d{1,2}(?:\\.\\d{1,2}){1,2})\\b", doc.page_content)
         doc.metadata["clause"] = match.group(1) if match else "Unknown"
         return doc
 
@@ -68,6 +94,10 @@ enriched_chunks = st.session_state.vectorstore["chunks"]
 # === USER QUERY ===
 query = st.text_input("🔍 Ask your AS3000 question:")
 if query:
+    # === GPT Classify Query Context ===
+    tag_context = gpt_classify_query_context(query, OPENAI_API_KEY)
+    st.write(f"🧠 **Detected Context:** `{tag_context}`")
+
     dense_docs = retriever.get_relevant_documents(query)
     sparse_docs = bm25.get_relevant_documents(query)
     combined_docs = dense_docs + sparse_docs
@@ -81,7 +111,6 @@ if query:
         input_documents=combined_docs, question=query
     )
 
-    st.subheader("✅ Best Answer")
     st.success(result)
 
     # === Confidence Barometer ===
@@ -89,22 +118,19 @@ if query:
         base_score = 0
         if len(docs) >= 2:
             base_score += 40
-        if any("clause" in d.metadata and re.match(r"\d+\.\d+", d.metadata["clause"]) for d in docs):
+        if any("clause" in d.metadata and re.match(r"\\d+\\.\\d+", d.metadata["clause"]) for d in docs):
             base_score += 30
         if all(len(d.page_content) > 300 for d in docs[:2]):
             base_score += 20
-        return min(base_score + 10, 100)  # add 10 for base LLM confidence
-    
+        return min(base_score + 10, 100)
+
     confidence_score = compute_confidence(combined_docs)
-    
     st.progress(confidence_score / 100)
     st.write(f"**Confidence: {confidence_score}%** — Based on clause match, document strength, and chunk quality.")
-    
+
     st.subheader("📚 Top Clause Matches")
     for i, doc in enumerate(combined_docs[:3]):
         clause = doc.metadata.get("clause", "Unknown")
         page = doc.metadata.get("page", "N/A")
         st.markdown(f"**Match {i+1}** — Clause `{clause}` | Page `{page}`")
         st.code(doc.page_content[:500], language="text")
-
-
