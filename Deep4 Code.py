@@ -84,14 +84,7 @@ if query:
     st.subheader("✅ Best Answer")
     st.success(result)
 
-    st.subheader("📚 Top Clause Matches")
-    for i, doc in enumerate(combined_docs[:3]):
-        clause = doc.metadata.get("clause", "Unknown")
-        page = doc.metadata.get("page", "N/A")
-        st.markdown(f"**Match {i+1}** — Clause `{clause}` | Page `{page}`")
-        st.code(doc.page_content[:500], language="text")
-
-# === Confidence Barometer ===
+   # === Confidence Barometer ===
 def compute_confidence(docs):
     base_score = 0
     if len(docs) >= 2:
@@ -104,7 +97,14 @@ def compute_confidence(docs):
 
 confidence_score = compute_confidence(combined_docs)
 
-st.subheader("📊 Confidence Barometer")
 st.progress(confidence_score / 100)
 st.write(f"**Confidence: {confidence_score}%** — Based on clause match, document strength, and chunk quality.")
+    
+    st.subheader("📚 Top Clause Matches")
+    for i, doc in enumerate(combined_docs[:3]):
+        clause = doc.metadata.get("clause", "Unknown")
+        page = doc.metadata.get("page", "N/A")
+        st.markdown(f"**Match {i+1}** — Clause `{clause}` | Page `{page}`")
+        st.code(doc.page_content[:500], language="text")
+
 
