@@ -84,7 +84,7 @@ if query:
     st.subheader("✅ Best Answer")
     st.success(result)
 
-   # === Confidence Barometer ===
+# === Confidence Barometer ===
 def compute_confidence(docs):
     base_score = 0
     if len(docs) >= 2:
